@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom nature-inspired palette
+				leaf: {
+					50: '#f2f9f2',
+					100: '#dff0df',
+					200: '#bee2be',
+					300: '#93ce93',
+					400: '#68b568',
+					500: '#499849',
+					600: '#377937',
+					700: '#2c602c',
+					800: '#254c25',
+					900: '#203f20',
+					950: '#102210',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +99,29 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
+				},
+				'leaf-sway': {
+					'0%, 100%': {
+						transform: 'rotate(-2deg)'
+					},
+					'50%': {
+						transform: 'rotate(2deg)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'leaf-sway': 'leaf-sway 3s ease-in-out infinite'
 			}
 		}
 	},
