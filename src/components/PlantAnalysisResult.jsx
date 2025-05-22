@@ -3,14 +3,9 @@ import React from 'react';
 import { Leaf, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-
-interface PlantAnalysisResultProps {
-  imageUrl: string;
-  onReset: () => void;
-}
 
 // Mock data - in a real app, this would come from the AI analysis
 const mockAnalysisData = {
@@ -39,7 +34,7 @@ const mockAnalysisData = {
   ]
 };
 
-const PlantAnalysisResult: React.FC<PlantAnalysisResultProps> = ({ imageUrl, onReset }) => {
+const PlantAnalysisResult = ({ imageUrl, onReset }) => {
   return (
     <motion.div 
       className="w-full bg-white rounded-xl overflow-hidden shadow-lg"
