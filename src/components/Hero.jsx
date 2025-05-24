@@ -1,72 +1,74 @@
 
-import { useState } from 'react';
-import { Leaf } from 'lucide-react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import UploadDropzone from './UploadDropzone';
+import { Leaf, Upload, Brain, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
-  const [showUpload, setShowUpload] = useState(false);
-  
   return (
-    <section className="relative min-h-[85vh] flex flex-col justify-center items-center py-12 px-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute -top-10 -left-10 w-64 h-64 bg-leaf-100 rounded-full blur-3xl opacity-30"></div>
-        <div className="absolute top-1/4 right-0 w-80 h-80 bg-accent rounded-full blur-3xl opacity-20"></div>
-        <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-leaf-200 rounded-full blur-3xl opacity-20"></div>
-      </div>
-      
-      <div className="text-center max-w-3xl mx-auto mb-8">
-        <motion.div 
+    <section className="py-16 md:py-24 container max-w-6xl mx-auto px-4">
+      <div className="text-center space-y-8">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex justify-center mb-6"
+          className="space-y-4"
         >
-          <Leaf className="h-12 w-12 text-leaf-500 animate-leaf-sway" />
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+            AI-Powered Plant Disease Detection
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+            Upload a photo of your plant and get instant disease diagnosis with treatment recommendations
+          </p>
         </motion.div>
-        
-        <motion.h1 
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+          className="flex flex-wrap justify-center gap-4"
         >
-          Turn every leaf into insight
-        </motion.h1>
-        
-        <motion.p 
+          <Link to="/dashboard">
+            <button className="bg-leaf-600 hover:bg-leaf-700 text-white font-medium py-4 px-8 rounded-lg transition-colors text-lg">
+              Start Analyzing Plants
+            </button>
+          </Link>
+          <button className="bg-white hover:bg-gray-50 text-leaf-700 border-2 border-leaf-600 font-medium py-4 px-8 rounded-lg transition-colors text-lg">
+            Watch Demo
+          </button>
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-lg md:text-xl text-muted-foreground mb-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
         >
-          Upload a plant photo, and our AI instantly spots diseases and suggests treatments — no sign-up required.
-        </motion.p>
-        
-        {!showUpload && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            onClick={() => setShowUpload(true)}
-            className="bg-leaf-600 hover:bg-leaf-700 text-white font-medium py-3 px-8 rounded-lg transition-all transform hover:scale-105"
-          >
-            Try it now
-          </motion.button>
-        )}
-      </div>
-      
-      {showUpload && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-2xl"
-        >
-          <UploadDropzone />
+          <div className="text-center space-y-3">
+            <div className="bg-leaf-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+              <Upload className="w-8 h-8 text-leaf-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Upload Photo</h3>
+            <p className="text-gray-600">Simply take or upload a photo of your plant's affected area</p>
+          </div>
+          
+          <div className="text-center space-y-3">
+            <div className="bg-leaf-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+              <Brain className="w-8 h-8 text-leaf-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">AI Analysis</h3>
+            <p className="text-gray-600">Our advanced AI identifies diseases with 95%+ accuracy</p>
+          </div>
+          
+          <div className="text-center space-y-3">
+            <div className="bg-leaf-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+              <FileText className="w-8 h-8 text-leaf-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Get Treatment</h3>
+            <p className="text-gray-600">Receive detailed treatment plans and preventive measures</p>
+          </div>
         </motion.div>
-      )}
+      </div>
     </section>
   );
 };

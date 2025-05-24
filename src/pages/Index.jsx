@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -27,9 +28,11 @@ const Index = () => {
                 Create a free account to unlock advanced features, save your plant history, and get personalized care recommendations.
               </p>
               <div className="flex flex-wrap gap-4">
-                <button className="bg-white text-leaf-800 hover:bg-leaf-50 font-medium py-3 px-8 rounded-lg transition-colors">
-                  Get Started — It's Free
-                </button>
+                <Link to="/dashboard">
+                  <button className="bg-white text-leaf-800 hover:bg-leaf-50 font-medium py-3 px-8 rounded-lg transition-colors">
+                    Get Started — It's Free
+                  </button>
+                </Link>
                 <button className="bg-leaf-700 hover:bg-leaf-800 text-white border border-leaf-500 font-medium py-3 px-8 rounded-lg transition-colors">
                   Learn More
                 </button>
