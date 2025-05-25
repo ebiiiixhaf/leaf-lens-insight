@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 
-// Mock data - in a real app, this would come from the AI analysis
-const mockAnalysisData = {
+// Default mock data for single image analysis
+const defaultMockData = {
   disease: "Powdery Mildew",
   confidence: 89,
   description: "Powdery mildew is a fungal disease that affects a wide range of plants. It appears as a white powdery substance on leaf surfaces, stems, and sometimes fruit.",
@@ -34,7 +34,9 @@ const mockAnalysisData = {
   ]
 };
 
-const PlantAnalysisResult = ({ imageUrl, onReset }) => {
+const PlantAnalysisResult = ({ imageUrl, onReset, analysisData = null, hideResetButton = false }) => {
+  const data = analysisData || defaultMockData;
+
   return (
     <motion.div 
       className="w-full bg-white rounded-xl overflow-hidden shadow-lg"
@@ -48,42 +50,44 @@ const PlantAnalysisResult = ({ imageUrl, onReset }) => {
             src={imageUrl} 
             alt="Analyzed plant" 
             className="w-full h-full object-cover"
-            style={{ maxHeight: '600px' }}
+            style={{ maxHeight: '400px' }}
           />
-          <Button 
-            variant="outline"
-            size="icon"
-            className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm hover:bg-white"
-            onClick={onReset}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          {!hideResetButton && (
+            <Button 
+              variant="outline"
+              size="icon"
+              className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm hover:bg-white"
+              onClick={onReset}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
             <div className="flex items-center">
               <div className="mr-3">
                 <Leaf className="h-7 w-7 text-leaf-300" />
               </div>
               <div>
-                <h3 className="font-medium text-xl">{mockAnalysisData.disease}</h3>
+                <h3 className="font-medium text-xl">{data.disease}</h3>
                 <div className="flex items-center mt-1">
                   <div className="w-full max-w-36">
-                    <Progress value={mockAnalysisData.confidence} className="h-2 bg-white/30" />
+                    <Progress value={data.confidence} className="h-2 bg-white/30" />
                   </div>
-                  <span className="ml-2 text-sm">{mockAnalysisData.confidence}% confidence</span>
+                  <span className="ml-2 text-sm">{data.confidence}% confidence</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        <div className="md:w-3/5 p-6 md:p-8 max-h-[600px] overflow-y-auto">
+        <div className="md:w-3/5 p-6 md:p-8 max-h-[400px] overflow-y-auto">
           <h2 className="text-2xl font-bold mb-4">Analysis Results</h2>
-          <p className="text-muted-foreground mb-6">{mockAnalysisData.description}</p>
+          <p className="text-muted-foreground mb-6">{data.description}</p>
           
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3">Recommended Treatments</h3>
             <div className="space-y-4">
-              {mockAnalysisData.treatments.map((treatment, index) => (
+              {data.treatments.map((treatment, index) => (
                 <Card key={index} className="bg-secondary/50 border-leaf-100">
                   <CardContent className="p-4">
                     <h4 className="font-medium text-leaf-700 mb-1">{treatment.name}</h4>
@@ -99,21 +103,23 @@ const PlantAnalysisResult = ({ imageUrl, onReset }) => {
           <div>
             <h3 className="text-lg font-semibold mb-3">Prevention Tips</h3>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-              {mockAnalysisData.preventionTips.map((tip, index) => (
+              {data.preventionTips.map((tip, index) => (
                 <li key={index}>{tip}</li>
               ))}
             </ul>
           </div>
           
-          <div className="mt-8 pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              For advanced features and farm-wide reports,{" "}
-              <a href="#" className="text-leaf-600 hover:text-leaf-700 font-medium">
-                create a free account
-              </a>
-              .
-            </p>
-          </div>
+          {!hideResetButton && (
+            <div className="mt-8 pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                For advanced features and farm-wide reports,{" "}
+                <a href="#" className="text-leaf-600 hover:text-leaf-700 font-medium">
+                  create a free account
+                </a>
+                .
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
