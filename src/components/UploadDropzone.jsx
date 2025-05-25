@@ -1,180 +1,214 @@
-import { useState } from 'react';
-import { Image, Upload, ArrowUp, X } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import PlantAnalysisResult from './PlantAnalysisResult';
-import { useToast } from '@/components/ui/use-toast';
+
+import React, { useState, useRef } from 'react';
+import { Upload, X, FileImage, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 
 const UploadDropzone = () => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [analysisResults, setAnalysisResults] = useState([]);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
   const { toast } = useToast();
 
-  const handleDragEnter = (e) => {
+  const MAX_FILES = 10;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const handleDragOver = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) {
-      setIsDragging(true);
-    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     setIsDragging(false);
-    
-    const files = e.dataTransfer.files;
-    processFiles(files);
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
   };
 
   const handleFileSelect = (e) => {
-    console.log('File select triggered', e.target.files);
-    if (e.target.files && e.target.files.length > 0) {
-      processFiles(e.target.files);
-    }
+    const files = Array.from(e.target.files);
+    handleFiles(files);
   };
 
-  const handleUploadClick = () => {
-    const fileInput = document.getElementById('file-upload-input');
-    if (fileInput) {
-      fileInput.click();
-    }
-  };
-
-  const processFiles = (files) => {
-    if (files.length === 0) return;
+  const handleFiles = (files) => {
+    console.log('Processing files:', files);
     
-    const newFiles = [];
-    
-    Array.from(files).forEach((file) => {
-      // Check if file is an image
+    // Filter valid image files
+    const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Unsupported File",
+          title: "Invalid file",
           description: `${file.name} is not an image file`,
           variant: "destructive"
         });
-        return;
+        return false;
       }
-
-      // Size check (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
+      
+      if (file.size > MAX_FILE_SIZE) {
         toast({
-          title: "File Too Large",
-          description: `${file.name} is larger than 10MB`,
+          title: "File too large",
+          description: `${file.name} exceeds 10MB limit`,
           variant: "destructive"
         });
-        return;
+        return false;
       }
-
-      // Check batch limit (max 10 files)
-      if (uploadedFiles.length + newFiles.length >= 10) {
-        toast({
-          title: "Too Many Files",
-          description: "Maximum 10 files allowed per batch",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && typeof event.target.result === 'string') {
-          const uploadedFile = {
-            file,
-            preview: event.target.result,
-            id: Math.random().toString(36).substr(2, 9)
-          };
-          newFiles.push(uploadedFile);
-          
-          if (newFiles.length === Array.from(files).filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024).length) {
-            setUploadedFiles(prev => [...prev, ...newFiles]);
-          }
-        }
-      };
-      reader.readAsDataURL(file);
+      
+      return true;
     });
+
+    // Check total file count
+    if (selectedFiles.length + validFiles.length > MAX_FILES) {
+      toast({
+        title: "Too many files",
+        description: `Maximum ${MAX_FILES} files allowed`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create file objects with preview URLs
+    const newFiles = validFiles.map(file => ({
+      file,
+      id: Math.random().toString(36).substr(2, 9),
+      preview: URL.createObjectURL(file),
+      name: file.name
+    }));
+
+    setSelectedFiles(prev => [...prev, ...newFiles]);
   };
 
   const removeFile = (id) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== id));
+    setSelectedFiles(prev => {
+      const updated = prev.filter(f => f.id !== id);
+      // Clean up preview URL
+      const fileToRemove = prev.find(f => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return updated;
+    });
   };
 
-  const simulateAnalysis = () => {
-    setIsAnalyzing(true);
+  const uploadFiles = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
     
-    // Simulate batch analysis with a timeout
-    setTimeout(() => {
-      const mockResults = uploadedFiles.map((file, index) => ({
-        disease: ["Powdery Mildew", "Late Blight", "Early Blight", "Leaf Spot"][index % 4],
-        confidence: Math.floor(Math.random() * (95 - 75) + 75),
-        description: "Detailed description of the plant disease detected in this image.",
-        pesticides: "Recommended treatment options for this specific disease.",
-        imageUrl: file.preview
-      }));
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach(fileObj => {
+        formData.append('files', fileObj.file);
+      });
+
+      console.log('Uploading files to backend...');
       
-      setAnalysisResults(mockResults);
-      setIsAnalyzing(false);
-      setAnalysisComplete(true);
-    }, 3000);
+      // Replace with your actual API endpoint
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Analysis results:', data);
+
+      // Map results with file previews
+      const resultsWithPreviews = data.results.map((result, index) => ({
+        ...result,
+        preview: selectedFiles[index]?.preview,
+        fileName: selectedFiles[index]?.name
+      }));
+
+      setAnalysisResults(resultsWithPreviews);
+      
+      toast({
+        title: "Analysis complete",
+        description: `Successfully analyzed ${selectedFiles.length} images`,
+      });
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to analyze images",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const resetAnalysis = () => {
-    setUploadedFiles([]);
-    setIsAnalyzing(false);
-    setAnalysisComplete(false);
+  const resetUpload = () => {
+    // Clean up preview URLs
+    selectedFiles.forEach(fileObj => {
+      URL.revokeObjectURL(fileObj.preview);
+    });
+    setSelectedFiles([]);
     setAnalysisResults([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  if (analysisComplete && analysisResults.length > 0) {
+  // Show results if analysis is complete
+  if (analysisResults.length > 0) {
     return (
       <div className="w-full space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Batch Analysis Results</h2>
-          <Button onClick={resetAnalysis} variant="outline">
-            Upload New Images
+          <h2 className="text-2xl font-bold">Analysis Results</h2>
+          <Button onClick={resetUpload} variant="outline">
+            Analyze New Images
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {analysisResults.map((result, index) => (
-            <PlantAnalysisResult 
-              key={index}
-              imageUrl={result.imageUrl}
-              analysisData={{
-                disease: result.disease,
-                confidence: result.confidence,
-                description: result.description,
-                treatments: [
-                  {
-                    name: "Primary Treatment",
-                    description: result.pesticides
-                  }
-                ],
-                preventionTips: [
-                  "Improve air circulation around plants",
-                  "Avoid overhead watering",
-                  "Remove infected plant material"
-                ]
-              }}
-              onReset={() => {}}
-              hideResetButton={true}
-            />
+            <Card key={index} className="overflow-hidden">
+              <div className="aspect-video relative">
+                <img 
+                  src={result.preview} 
+                  alt={result.fileName}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <p className="text-white text-sm font-medium">{result.fileName}</p>
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="font-semibold text-lg text-red-600">{result.disease}</h3>
+                    <div className="flex items-center justify-between text-sm mt-1">
+                      <span>Confidence:</span>
+                      <span className="font-medium">{(result.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    <Progress value={result.confidence * 100} className="h-2 mt-1" />
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Description:</h4>
+                    <p className="text-xs text-gray-600 line-clamp-3">{result.description}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Treatment:</h4>
+                    <p className="text-xs text-gray-600 line-clamp-2">{result.pesticides}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -182,92 +216,95 @@ const UploadDropzone = () => {
   }
 
   return (
-    <motion.div 
-      className="w-full rounded-xl overflow-hidden space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="w-full space-y-6">
+      {/* Upload Zone */}
       <div
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={cn(
-          "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all duration-200 bg-white/80 backdrop-blur-sm",
-          isDragging ? "border-leaf-500 bg-leaf-50" : "border-leaf-200",
-          isAnalyzing ? "opacity-75" : "hover:bg-leaf-50/50"
-        )}
+        className={`
+          border-2 border-dashed rounded-lg p-8 text-center transition-colors
+          ${isDragging ? 'border-primary bg-primary/5' : 'border-gray-300'}
+          ${isUploading ? 'opacity-50 pointer-events-none' : 'hover:border-primary hover:bg-gray-50'}
+        `}
       >
-        {isAnalyzing ? (
-          <div className="flex flex-col items-center py-8">
-            <div className="w-16 h-16 border-4 border-t-leaf-500 border-leaf-200 rounded-full animate-spin mb-4"></div>
-            <h3 className="text-xl font-medium mb-2">Analyzing your plants...</h3>
-            <p className="text-muted-foreground">Processing {uploadedFiles.length} images for disease detection</p>
+        {isUploading ? (
+          <div className="space-y-4">
+            <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
+            <div>
+              <h3 className="text-lg font-medium">Analyzing your plants...</h3>
+              <p className="text-gray-600">Processing {selectedFiles.length} images</p>
+            </div>
           </div>
         ) : (
-          <>
-            <div className="w-16 h-16 bg-leaf-100 rounded-full flex items-center justify-center mb-4">
-              <Image className="w-8 h-8 text-leaf-600" />
+          <div className="space-y-4">
+            <Upload className="w-12 h-12 mx-auto text-gray-400" />
+            <div>
+              <h3 className="text-lg font-medium mb-2">Upload Plant Images</h3>
+              <p className="text-gray-600 mb-4">
+                Drag and drop images here, or click to browse
+              </p>
+              <Button onClick={() => fileInputRef.current?.click()}>
+                Choose Files
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
-            <h3 className="text-xl font-medium mb-2">Drop your plant photos here</h3>
-            <p className="text-muted-foreground mb-6">
-              Drag and drop multiple images or click to upload (Max 10 files)
+            <p className="text-sm text-gray-500">
+              Supports JPG, PNG, GIF • Max {MAX_FILES} files • 10MB per file
             </p>
-            <button
-              onClick={handleUploadClick}
-              className="bg-leaf-600 hover:bg-leaf-700 text-white font-medium py-2 px-5 rounded-lg cursor-pointer transition-all transform hover:scale-105 flex items-center"
-            >
-              <ArrowUp className="w-4 h-4 mr-2" />
-              Upload Images
-            </button>
-            <input
-              id="file-upload-input"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <p className="mt-6 text-xs text-muted-foreground">
-              Supported formats: JPG, PNG, GIF • Max size: 10MB per file
-            </p>
-          </>
+          </div>
         )}
       </div>
 
-      {uploadedFiles.length > 0 && !isAnalyzing && (
+      {/* Selected Files Preview */}
+      {selectedFiles.length > 0 && !isUploading && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Selected Images ({uploadedFiles.length})</h3>
-            <Button onClick={simulateAnalysis} className="bg-leaf-600 hover:bg-leaf-700">
-              Analyze All Images
-            </Button>
+            <h3 className="text-lg font-medium">
+              Selected Files ({selectedFiles.length}/{MAX_FILES})
+            </h3>
+            <div className="space-x-2">
+              <Button variant="outline" onClick={resetUpload}>
+                Clear All
+              </Button>
+              <Button onClick={uploadFiles}>
+                Analyze Images
+              </Button>
+            </div>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {uploadedFiles.map((file) => (
-              <div key={file.id} className="relative group">
-                <img
-                  src={file.preview}
-                  alt="Plant preview"
-                  className="w-full h-32 object-cover rounded-lg border"
-                />
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {selectedFiles.map((fileObj) => (
+              <div key={fileObj.id} className="relative group">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                  <img
+                    src={fileObj.preview}
+                    alt={fileObj.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <button
-                  onClick={() => removeFile(file.id)}
-                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => removeFile(fileObj.id)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <p className="mt-1 text-xs text-muted-foreground truncate">
-                  {file.file.name}
+                <p className="mt-1 text-xs text-gray-600 truncate">
+                  {fileObj.name}
                 </p>
               </div>
             ))}
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
