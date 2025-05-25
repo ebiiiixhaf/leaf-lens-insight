@@ -7,41 +7,27 @@ import PlantAnalysisResult from './PlantAnalysisResult';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 
-interface UploadedFile {
-  file: File;
-  preview: string;
-  id: string;
-}
-
-interface AnalysisResult {
-  disease: string;
-  confidence: number;
-  description: string;
-  pesticides: string;
-  imageUrl: string;
-}
-
 const UploadDropzone = () => {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
+  const [analysisResults, setAnalysisResults] = useState([]);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const { toast } = useToast();
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isDragging) {
@@ -49,7 +35,7 @@ const UploadDropzone = () => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -58,16 +44,16 @@ const UploadDropzone = () => {
     processFiles(files);
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       processFiles(e.target.files);
     }
   };
 
-  const processFiles = (files: FileList) => {
+  const processFiles = (files) => {
     if (files.length === 0) return;
     
-    const newFiles: UploadedFile[] = [];
+    const newFiles = [];
     
     Array.from(files).forEach((file) => {
       // Check if file is an image
@@ -103,7 +89,7 @@ const UploadDropzone = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target && typeof event.target.result === 'string') {
-          const uploadedFile: UploadedFile = {
+          const uploadedFile = {
             file,
             preview: event.target.result,
             id: Math.random().toString(36).substr(2, 9)
@@ -119,7 +105,7 @@ const UploadDropzone = () => {
     });
   };
 
-  const removeFile = (id: string) => {
+  const removeFile = (id) => {
     setUploadedFiles(prev => prev.filter(file => file.id !== id));
   };
 
@@ -128,7 +114,7 @@ const UploadDropzone = () => {
     
     // Simulate batch analysis with a timeout
     setTimeout(() => {
-      const mockResults: AnalysisResult[] = uploadedFiles.map((file, index) => ({
+      const mockResults = uploadedFiles.map((file, index) => ({
         disease: ["Powdery Mildew", "Late Blight", "Early Blight", "Leaf Spot"][index % 4],
         confidence: Math.floor(Math.random() * (95 - 75) + 75),
         description: "Detailed description of the plant disease detected in this image.",
