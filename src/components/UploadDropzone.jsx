@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Image, Upload, ArrowUp, X } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -45,8 +44,16 @@ const UploadDropzone = () => {
   };
 
   const handleFileSelect = (e) => {
+    console.log('File select triggered', e.target.files);
     if (e.target.files && e.target.files.length > 0) {
       processFiles(e.target.files);
+    }
+  };
+
+  const handleUploadClick = () => {
+    const fileInput = document.getElementById('file-upload-input');
+    if (fileInput) {
+      fileInput.click();
     }
   };
 
@@ -207,17 +214,21 @@ const UploadDropzone = () => {
             <p className="text-muted-foreground mb-6">
               Drag and drop multiple images or click to upload (Max 10 files)
             </p>
-            <label className="bg-leaf-600 hover:bg-leaf-700 text-white font-medium py-2 px-5 rounded-lg cursor-pointer transition-all transform hover:scale-105 flex items-center">
+            <button
+              onClick={handleUploadClick}
+              className="bg-leaf-600 hover:bg-leaf-700 text-white font-medium py-2 px-5 rounded-lg cursor-pointer transition-all transform hover:scale-105 flex items-center"
+            >
               <ArrowUp className="w-4 h-4 mr-2" />
               Upload Images
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </label>
+            </button>
+            <input
+              id="file-upload-input"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
             <p className="mt-6 text-xs text-muted-foreground">
               Supported formats: JPG, PNG, GIF • Max size: 10MB per file
             </p>
