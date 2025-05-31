@@ -1,67 +1,35 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, Play, Download, ExternalLink, AlertTriangle, Leaf, Camera, Calendar, Shield } from 'lucide-react';
-
-const diseaseProfiles = [
-  {
-    name: "Corn Blight",
-    symptoms: "Brown lesions on leaves, yellowing, reduced yield",
-    causes: "Fungal infection, humid conditions, poor air circulation",
-    treatment: "Fungicide application, resistant varieties, crop rotation",
-    impact: "Can reduce yield by 20-50% if untreated"
-  },
-  {
-    name: "Grape Powdery Mildew",
-    symptoms: "White powdery coating on leaves and fruit",
-    causes: "Fungal spores, warm dry conditions followed by humidity",
-    treatment: "Sulfur-based fungicides, proper pruning for air circulation",
-    impact: "Affects fruit quality and can cause complete crop loss"
-  },
-  {
-    name: "Potato Late Blight",
-    symptoms: "Dark spots on leaves, white fuzzy growth on undersides",
-    causes: "Phytophthora infestans, cool wet weather",
-    treatment: "Copper-based fungicides, resistant varieties, proper spacing",
-    impact: "Can destroy entire crops within weeks"
-  },
-  {
-    name: "Tomato Bacterial Spot",
-    symptoms: "Small dark spots on leaves and fruit",
-    causes: "Bacterial infection, warm humid conditions, overhead watering",
-    treatment: "Copper sprays, resistant varieties, drip irrigation",
-    impact: "Reduces marketable fruit quality and yield"
-  }
-];
-
-const seasonalTips = [
-  {
-    season: "Spring",
-    tips: ["Monitor for early fungal infections", "Apply preventative treatments", "Check soil drainage"],
-    diseases: ["Early blight", "Downy mildew"]
-  },
-  {
-    season: "Summer",
-    tips: ["Watch for heat stress symptoms", "Maintain proper irrigation", "Monitor for bacterial diseases"],
-    diseases: ["Bacterial spot", "Powdery mildew"]
-  },
-  {
-    season: "Fall",
-    tips: ["Prepare for harvest diseases", "Clean up plant debris", "Plan crop rotation"],
-    diseases: ["Late blight", "Storage diseases"]
-  },
-  {
-    season: "Winter",
-    tips: ["Plan next season", "Study disease patterns", "Prepare equipment"],
-    diseases: ["Soil-borne pathogens"]
-  }
-];
+import { BookOpen, Play, Download, ExternalLink, AlertTriangle, Leaf, Camera, Calendar, Shield, Loader2 } from 'lucide-react';
+import { useLearnData } from '../hooks/useLearnData';
 
 export const Learn = () => {
   const [activeTab, setActiveTab] = useState("intro");
+  const { diseaseProfiles, seasonalTips, treatmentData, cropDiseaseInfo, loading, error } = useLearnData();
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Loading learning content...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">Error loading content. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -98,23 +66,17 @@ export const Learn = () => {
                 <div>
                   <h3 className="font-semibold mb-2">Common Crop Diseases</h3>
                   <ul className="space-y-2 text-sm">
-                    <li>• <strong>Corn:</strong> Northern/Southern Blight, Rust, Smut</li>
-                    <li>• <strong>Grapes:</strong> Powdery Mildew, Downy Mildew, Black Rot</li>
-                    <li>• <strong>Potatoes:</strong> Late Blight, Early Blight, Scab</li>
-                    <li>• <strong>Tomatoes:</strong> Bacterial Spot, Fusarium Wilt, Blight</li>
-                    <li>• <strong>Wheat:</strong> Rust, Powdery Mildew, Septoria</li>
-                    <li>• <strong>Olives:</strong> Olive Knot, Peacock Spot, Verticillium Wilt</li>
+                    {cropDiseaseInfo?.commonCrops.map((crop, index) => (
+                      <li key={index}>• <strong>{crop.crop}:</strong> {crop.diseases.join(', ')}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Key Symptoms to Watch</h3>
                   <ul className="space-y-2 text-sm">
-                    <li>• Unusual leaf spots or discoloration</li>
-                    <li>• Wilting despite adequate water</li>
-                    <li>• Stunted or abnormal growth</li>
-                    <li>• Powdery or fuzzy growth on surfaces</li>
-                    <li>• Fruit or seed abnormalities</li>
-                    <li>• Premature yellowing or leaf drop</li>
+                    {cropDiseaseInfo?.keySymptoms.map((symptom, index) => (
+                      <li key={index}>• {symptom}</li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -186,27 +148,25 @@ export const Learn = () => {
                 <div>
                   <h4 className="font-medium mb-2">Fungicides</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Copper-based (Bordeaux mixture)</li>
-                    <li>• Triazole compounds</li>
-                    <li>• Strobilurin fungicides</li>
-                    <li>• Sulfur-based treatments</li>
+                    {treatmentData?.chemical.fungicides.map((fungicide, index) => (
+                      <li key={index}>• {fungicide}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Bactericides</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Copper compounds</li>
-                    <li>• Streptomycin (where legal)</li>
-                    <li>• Oxytetracycline</li>
+                    {treatmentData?.chemical.bactericides.map((bactericide, index) => (
+                      <li key={index}>• {bactericide}</li>
+                    ))}
                   </ul>
                 </div>
                 <div className="bg-red-50 border border-red-200 rounded p-3">
                   <h5 className="font-medium text-red-800 mb-1">Safety Guidelines</h5>
                   <ul className="text-xs text-red-700 space-y-1">
-                    <li>• Always read and follow label instructions</li>
-                    <li>• Wear appropriate protective equipment</li>
-                    <li>• Respect pre-harvest intervals</li>
-                    <li>• Avoid spraying in windy conditions</li>
+                    {treatmentData?.chemical.safetyGuidelines.map((guideline, index) => (
+                      <li key={index}>• {guideline}</li>
+                    ))}
                   </ul>
                 </div>
               </CardContent>
@@ -223,28 +183,25 @@ export const Learn = () => {
                 <div>
                   <h4 className="font-medium mb-2">Biological Controls</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Beneficial microorganisms</li>
-                    <li>• Predatory insects</li>
-                    <li>• Competitive exclusion</li>
-                    <li>• Biocontrol agents</li>
+                    {treatmentData?.organic.biologicalControls.map((control, index) => (
+                      <li key={index}>• {control}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Cultural Practices</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Crop rotation (3-4 year cycles)</li>
-                    <li>• Resistant plant varieties</li>
-                    <li>• Proper plant spacing</li>
-                    <li>• Sanitation practices</li>
+                    {treatmentData?.organic.culturalPractices.map((practice, index) => (
+                      <li key={index}>• {practice}</li>
+                    ))}
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Natural Treatments</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Neem oil applications</li>
-                    <li>• Baking soda solutions</li>
-                    <li>• Compost tea sprays</li>
-                    <li>• Essential oil blends</li>
+                    {treatmentData?.organic.naturalTreatments.map((treatment, index) => (
+                      <li key={index}>• {treatment}</li>
+                    ))}
                   </ul>
                 </div>
               </CardContent>

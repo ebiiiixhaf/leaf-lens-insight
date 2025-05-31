@@ -1,0 +1,31 @@
+
+[
+  {
+    "name": "Corn Blight",
+    "symptoms": "Brown lesions on leaves, yellowing, reduced yield",
+    "causes": "Fungal infection, humid conditions, poor air circulation",
+    "treatment": "Fungicide application, resistant varieties, crop rotation",
+    "impact": "Can reduce yield by 20-50% if untreated"
+  },
+  {
+    "name": "Grape Powdery Mildew",
+    "symptoms": "White powdery coating on leaves and fruit",
+    "causes": "Fungal spores, warm dry conditions followed by humidity",
+    "treatment": "Sulfur-based fungicides, proper pruning for air circulation",
+    "impact": "Affects fruit quality and can cause complete crop loss"
+  },
+  {
+    "name": "Potato Late Blight",
+    "symptoms": "Dark spots on leaves, white fuzzy growth on undersides",
+    "causes": "Phytophthora infestans, cool wet weather",
+    "treatment": "Copper-based fungicides, resistant varieties, proper spacing",
+    "impact": "Can destroy entire crops within weeks"
+  },
+  {
+    "name": "Tomato Bacterial Spot",
+    "symptoms": "Small dark spots on leaves and fruit",
+    "causes": "Bacterial infection, warm humid conditions, overhead watering",
+    "treatment": "Copper sprays, resistant varieties, drip irrigation",
+    "impact": "Reduces marketable fruit quality and yield"
+  }
+]

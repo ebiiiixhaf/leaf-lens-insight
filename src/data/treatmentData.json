@@ -1,0 +1,42 @@
+
+{
+  "chemical": {
+    "fungicides": [
+      "Copper-based (Bordeaux mixture)",
+      "Triazole compounds",
+      "Strobilurin fungicides",
+      "Sulfur-based treatments"
+    ],
+    "bactericides": [
+      "Copper compounds",
+      "Streptomycin (where legal)",
+      "Oxytetracycline"
+    ],
+    "safetyGuidelines": [
+      "Always read and follow label instructions",
+      "Wear appropriate protective equipment",
+      "Respect pre-harvest intervals",
+      "Avoid spraying in windy conditions"
+    ]
+  },
+  "organic": {
+    "biologicalControls": [
+      "Beneficial microorganisms",
+      "Predatory insects",
+      "Competitive exclusion",
+      "Biocontrol agents"
+    ],
+    "culturalPractices": [
+      "Crop rotation (3-4 year cycles)",
+      "Resistant plant varieties",
+      "Proper plant spacing",
+      "Sanitation practices"
+    ],
+    "naturalTreatments": [
+      "Neem oil applications",
+      "Baking soda solutions",
+      "Compost tea sprays",
+      "Essential oil blends"
+    ]
+  }
+}
