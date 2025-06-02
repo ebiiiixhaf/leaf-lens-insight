@@ -5,11 +5,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "./components/DashboardLayout";
+import { UserDashboardLayout } from "./components/UserDashboardLayout";
 import { Dashboard } from "./pages/Dashboard";
+import { UserDashboard } from "./pages/UserDashboard";
 import { Reports } from "./pages/Reports";
 import { Predictions } from "./pages/Predictions";
+import { UserPredictions } from "./pages/UserPredictions";
 import { Learn } from "./pages/Learn";
 import { Profile } from "./pages/Profile";
+import { UserProfile } from "./pages/UserProfile";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +27,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          
+          {/* Farmer Routes */}
           <Route path="/dashboard" element={
             <DashboardLayout>
               <Dashboard />
@@ -48,6 +54,24 @@ const App = () => (
               <Profile />
             </DashboardLayout>
           } />
+
+          {/* User Routes */}
+          <Route path="/user-dashboard" element={
+            <UserDashboardLayout>
+              <UserDashboard />
+            </UserDashboardLayout>
+          } />
+          <Route path="/user-predictions" element={
+            <UserDashboardLayout>
+              <UserPredictions />
+            </UserDashboardLayout>
+          } />
+          <Route path="/user-profile" element={
+            <UserDashboardLayout>
+              <UserProfile />
+            </UserDashboardLayout>
+          } />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
